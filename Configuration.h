@@ -10,10 +10,17 @@ inline const int SCREEN_HEIGHT = 20;
 
 // 상수
 enum class ItemType {
+    // 사용 아이템
     HPPotion,
     MPPotion,
     Sword,
     Shield,
+
+    // 재료 아이템
+    SlimeJelly,
+    GoblinEar,
+    OrcHead,
+    DragonHorn,
 };
 
 enum class Stage {
@@ -24,6 +31,10 @@ enum class Stage {
     JobSelection,
     Battle,
     AlchemyWorkshop,
+    GameClear,
 };
 
+// 게임 변수
 inline Stage CURRENT_STAGE = Stage::GameStart;
+inline Stage PREVIOUS_STAGE = Stage::MainMenu;
+inline int PROGRESSION = 0;

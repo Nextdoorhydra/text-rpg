@@ -1,16 +1,16 @@
 #pragma once
 #include <map>
-#include "Configuration.h"
+#include "Item.h"
 
 class Inventory {
 public:
-    std::map<ItemType, int> Items;
+    std::map<Item, int> Items;
 
 
-    bool TryUseItem(ItemType itemType) {
-        if (Items.count(itemType) > 0 && Items[itemType] > 0) {
+    bool TryUseItem(Item item) {
+        if (Items.count(item) > 0 && Items[item] > 0) {
 
-            RemoveItem(itemType);
+            RemoveItem(item);
             return true;
         }
 
@@ -18,13 +18,13 @@ public:
     }
 
     // 아이템 추가
-    void AddItem(ItemType itemType) {
-        Items[itemType]++;
+    void AddItem(Item item) {
+        Items[item]++;
     }
     // 아이템 제거
-    void RemoveItem(ItemType itemType) {
-        if (--Items[itemType] <= 0) {
-            Items.erase(itemType);
+    void RemoveItem(Item item) {
+        if (--Items[item] <= 0) {
+            Items.erase(item);
         }
     }
 };

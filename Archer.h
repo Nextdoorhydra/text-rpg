@@ -8,8 +8,8 @@ public:
         attack += 30;
     }
 
-    void AttackEnemy() override {
-        // 마법 공격 구현
+    std::string AttackEnemy() override {
+        return std::string("Archer's Attack!");
     }
 
     std::string WhoAmI() override {

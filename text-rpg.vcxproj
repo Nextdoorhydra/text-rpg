@@ -129,10 +129,12 @@
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Inventory.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="Mage.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Rogue.cpp" />
+    <ClCompile Include="Thief.cpp" />
     <ClCompile Include="UI.cpp" />
     <ClCompile Include="Warrior.cpp" />
   </ItemGroup>
@@ -141,11 +143,18 @@
     <ClInclude Include="Character.h" />
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="Controller.h" />
+    <ClInclude Include="Dragon.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="Goblin.h" />
+    <ClInclude Include="IBattleable.h" />
     <ClInclude Include="Inventory.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="Mage.h" />
+    <ClInclude Include="Monster.h" />
+    <ClInclude Include="Orc.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="Rogue.h" />
+    <ClInclude Include="Slime.h" />
+    <ClInclude Include="Thief.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Warrior.h" />

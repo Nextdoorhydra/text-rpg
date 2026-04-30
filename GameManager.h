@@ -1,12 +1,14 @@
 #pragma once
 
 class Player;
+class Monster;
 
 // 싱글턴
 class GameManager {
 private:
     GameManager() {} // 숨김
     Player* PLAYER = nullptr; // 전방선언은 포인터만 가능
+    Monster* MONSTER = nullptr;
 public:
     ~GameManager();
 
@@ -25,4 +27,8 @@ public:
     Player* GetPlayer();
 
     Player* SetPlayer(Player* newPlayer);
+
+    Monster* GetMonster();
+
+    Monster* SpawnMonster();
 };

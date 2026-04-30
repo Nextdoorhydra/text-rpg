@@ -1,8 +1,9 @@
 #pragma once
 #include "Character.h"
 #include "Inventory.h"
+#include "IBattleable.h"
 
-class Player : public Character {
+class Player : public Character, public IBattleable {
 public:
     Player(const std::string& name, int hp, int mp, int attack, int defense);
     ~Player() {
@@ -11,17 +12,12 @@ public:
 
     Inventory* Inven = nullptr;
 
-    virtual void AttackEnemy() = 0;
-
-    virtual std::string WhoAmI() = 0;
-
-
     void LevelUp() {
         Level++;
         Hp += 10;
         Mp += 10;
-        Attack += 5;
-        Defense += 5;
+        Attack += 3;
+        Defense += 1;
         MaxHp = Hp;
         MaxMp = Mp;
     }
@@ -46,8 +42,8 @@ class NoClassPlayer : public Player {
     NoClassPlayer(const std::string& name, int hp, int mp, int attack, int defense)
         : Player(name, hp, mp, attack, defense) {
     }
-    void AttackEnemy() override {
-
+    std::string AttackEnemy() override {
+        return std::string("beginner's attack!");
     }
 
     std::string WhoAmI() override {
