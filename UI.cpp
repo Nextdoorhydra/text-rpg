@@ -12,6 +12,7 @@ void UIManager::DisplayASCIIAnimation() {
     int frameSpeed = 10;
 
     switch (CURRENT_STAGE) {
+    case Stage::BattleMap:
     case Stage::GameStart: {
         static std::vector<std::vector<std::string>> portal = {
             { "                ", "     .---.      ", "   /  . .  \\    ", "   \\  . .  /    ", "     '---'      ", "                " },
@@ -70,9 +71,10 @@ void UIManager::DisplayASCIIAnimation() {
         frameSpeed = 8;
         break;
     }
+    case Stage::BattleReward:
     case Stage::Battle: {
         // PROGRESSION에 따른 몬스터 분기
-        if (PROGRESSION == 0) { // Slime
+        if (GameManager::GetInstance().GetProgression() == 0) { // Slime
             static std::vector<std::vector<std::string>> slime = {
                 { "                ", "      .---.     ", "     / o o \\    ", "    (   \"   )   ", "     '-----'    ", "                " },
                 { "                ", "                ", "     .---.      ", "    / - o \\     ", "   (   V   )    ", "                " },
@@ -82,7 +84,7 @@ void UIManager::DisplayASCIIAnimation() {
             targetFrames = &slime;
             frameSpeed = 10;
         }
-        else if (PROGRESSION == 1) { // Goblin
+        else if (GameManager::GetInstance().GetProgression() == 1) { // Goblin
             static std::vector<std::vector<std::string>> goblin = {
                 { "  <  ò  ó  >    ", "   \\  vv  /     ", "    |    |      ", "   /|    |\\     ", "    |____|      ", "                " },
                 { "  <  ó  ò  >    ", "   \\  vv  /     ", "    |    |      ", "   /|    |\\     ", "    |____|      ", "                " }
@@ -90,7 +92,7 @@ void UIManager::DisplayASCIIAnimation() {
             targetFrames = &goblin;
             frameSpeed = 12;
         }
-        else if (PROGRESSION == 2) { // Orc
+        else if (GameManager::GetInstance().GetProgression() == 2) { // Orc
             static std::vector<std::vector<std::string>> orc = {
                 { "   (  ò  ó  )   ", "    \\  --  /    ", "   /|      |\\   ", "  / |______| \\  ", "    |      |    ", "                " },
                 { "   (  O  O  )   ", "    \\  --  /    ", "   /|      |\\   ", "  / |______| \\  ", "    |      |    ", "                " }
@@ -138,6 +140,11 @@ void UIManager::DisplayASCIIAnimation() {
         }
         break;
     }
+    case Stage::AlchemyWorkshopShow:
+    case Stage::AlchemyWorkshopSearchByName:
+    case Stage::AlchemyWorkshopSearchByIngredient:
+    case Stage::AlchemyWorkshopDispense:
+    case Stage::AlchemyWorkshopReturn:
     case Stage::AlchemyWorkshop: {
         static std::vector<std::vector<std::string>> cauldron = {
             { "       o        ", "    O           ", "   .-----.      ", "  /_______\\     ", "  \\_______/     ", "   (  )  )      " },
@@ -216,7 +223,7 @@ void UIManager::DisplayStatus() {
 
     // CenterRight 영역에 6줄에 걸쳐 스테이터스 출력
     SetContext(UIPart::CenterRight, 0, "[ " + player.WhoAmI() + " " + player.Name + " ]");
-    SetContext(UIPart::CenterRight, 1, "Level: " + std::to_string(player.GetLevel()));
+    SetContext(UIPart::CenterRight, 1, "lv: " + std::to_string(player.GetLevel()) + "(exp: " + std::to_string(player.CurrentEXP) + "/" + "100" + ")");
     SetContext(UIPart::CenterRight, 2, "HP: " + std::to_string(player.GetHp()) + "/" + std::to_string(player.MaxHp));
     SetContext(UIPart::CenterRight, 3, "MP: " + std::to_string(player.Mp) + "/" + std::to_string(player.MaxMp));
     SetContext(UIPart::CenterRight, 4, "ATK: " + std::to_string(player.GetAttack()));
@@ -229,25 +236,25 @@ void UIManager::DisplayStatus() {
 }
 
 void UIManager::DisplayInventory() {
-    // 맵은 정렬되어 있으므로 일관된 순서로 출력됨
-    auto& items = GameManager::GetInstance().GetPlayer()->Inven->Items;
+    auto* inven = GameManager::GetInstance().GetPlayer()->Inven;
 
     int lineIdx = 0;
     int maxLines = (int)leftLines.size(); // SCREEN_HEIGHT - 7
 
     SetContext(UIPart::CenterLeft, lineIdx++, "======= [ INVENTORY ] =======");
 
-    // 맵을 순회하며 아이템 이름과 개수 출력
     int itemNumber = 1;
-    for (auto const& [item, count] : items) {
-        // 출력 범위를 벗어나면 중단
+
+    for (auto const& [item, count] : *inven) {
+
+        if (count <= 0) continue;
+
         if (lineIdx >= maxLines) break;
 
-        std::string itemInfo = std::to_string(itemNumber++) + ". " + item.Name + " (x" + std::to_string(count) + ")";
+        std::string itemInfo = std::to_string(itemNumber++) + ". " + item.Name + " (x" + std::to_string(count) + ")" + " - " + std::to_string(item.Price) + "G";
         SetContext(UIPart::CenterLeft, lineIdx++, itemInfo);
     }
 
-    // 인벤토리가 비었거나 리스트가 끝난 후 남은 공간 청소
     while (lineIdx < maxLines) {
         SetContext(UIPart::CenterLeft, lineIdx++, "");
     }

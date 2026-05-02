@@ -2,25 +2,34 @@
 
 class Player;
 class Monster;
+class DungeonRoom;
+class Alchemyworkshop;
 
 // 싱글턴
 class GameManager {
 private:
-    GameManager() {} // 숨김
+    GameManager(); // 숨김
+    static constexpr int ROOM_SIZE = 4;
     Player* PLAYER = nullptr; // 전방선언은 포인터만 가능
     Monster* MONSTER = nullptr;
+    Alchemyworkshop* ALCHEMY_WORKSHOP = nullptr;
+    DungeonRoom* ROOM[ROOM_SIZE]{ nullptr, nullptr, nullptr, nullptr };
+    int PROGRESSION = 0;
+
 public:
     ~GameManager();
+    GameManager(const GameManager&) = delete; // 복사생성자 금지
+    void operator=(const GameManager&) = delete; // 대입 연산 금지
 
     // 싱글턴 인스턴스를 가져오는 정적 함수
     inline static GameManager& GetInstance() {
         static GameManager Instance; // static 지역 변수로 인스턴스 생성함
         return Instance;
     }
-    GameManager(const GameManager&) = delete; // 복사생성자 금지
-    void operator=(const GameManager&) = delete; // 대입 연산 금지
 
     bool IsGameRunning = false;
+
+    Alchemyworkshop* GetAlchemyworkshop();
 
     void MakePlayer();
 
@@ -31,4 +40,10 @@ public:
     Monster* GetMonster();
 
     Monster* SpawnMonster();
+
+    int GetProgression() const;
+
+    void AdvanceProgression();
+
+    bool TrySetProgression(int k);
 };

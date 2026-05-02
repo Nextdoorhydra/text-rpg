@@ -16,8 +16,17 @@
     <Filter Include="Header Files\Character">
       <UniqueIdentifier>{79175742-16b1-4da1-a297-97168e60edf2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Character">
-      <UniqueIdentifier>{08de2d53-c630-4da8-9458-8ee7b7ba0085}</UniqueIdentifier>
+    <Filter Include="Header Files\Item">
+      <UniqueIdentifier>{4b684508-a19e-49ca-9602-461d2e21136b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core">
+      <UniqueIdentifier>{2daf792e-5298-496a-be50-a02d1337cccb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Data">
+      <UniqueIdentifier>{7faee5e7-c827-4645-902e-a19764336584}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Map">
+      <UniqueIdentifier>{41cd0e5f-abe8-43f0-88fd-4884350a6aff}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -36,50 +45,38 @@
     <ClCompile Include="Inventory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Character.cpp">
-      <Filter>Source Files\Character</Filter>
+    <ClCompile Include="Item.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files\Character</Filter>
+    <ClCompile Include="AlchemyWorkshop.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Warrior.cpp">
-      <Filter>Source Files\Character</Filter>
-    </ClCompile>
-    <ClCompile Include="Mage.cpp">
-      <Filter>Source Files\Character</Filter>
-    </ClCompile>
-    <ClCompile Include="Thief.cpp">
-      <Filter>Source Files\Character</Filter>
+    <ClCompile Include="PotionRecipe.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Archer.cpp">
-      <Filter>Source Files\Character</Filter>
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Character.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mage.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Monster.cpp">
-      <Filter>Source Files\Character</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Item.cpp">
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Thief.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Warrior.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UIManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Configuration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Controller.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inventory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Header Files\Character</Filter>
     </ClInclude>
@@ -101,9 +98,6 @@
     <ClInclude Include="Monster.h">
       <Filter>Header Files\Character</Filter>
     </ClInclude>
-    <ClInclude Include="Item.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Goblin.h">
       <Filter>Header Files\Character</Filter>
     </ClInclude>
@@ -118,6 +112,36 @@
     </ClInclude>
     <ClInclude Include="IBattleable.h">
       <Filter>Header Files\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="AlchemyWorkshop.h">
+      <Filter>Header Files\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="PotionRecipe.h">
+      <Filter>Header Files\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Inventory.h">
+      <Filter>Header Files\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>Header Files\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Configuration.h">
+      <Filter>Header Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GameManager.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="UIManager.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="DungeonRoom.h">
+      <Filter>Header Files\Map</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

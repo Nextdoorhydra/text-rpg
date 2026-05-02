@@ -15,12 +15,16 @@
 #include "Thief.h" // 리팩 후 분리
 #include "Archer.h" // 리팩 후 분리
 #include "Monster.h" // 리팩 후 분리
+#include "Alchemyworkshop.h" // 리팩 후 분리
 // =================
 
 static void ClearAllCenterLeftUI() {
     for (int i = 0; i < 13; i++)
         UIManager::SetContext(UIPart::CenterLeft, i, "");
 }
+
+// 검색모드 사용
+static std::string currentQuery = "";
 
 int main() {
     Controller controller;
@@ -65,10 +69,26 @@ Enter your hero's name: )";
         std::cout << "Invalid input. Please enter positive values greater than 0 for Attack, Defense." << std::endl;
     }
 
-    for (int i = 0; i < 5; ++i) {
-        player->Inven->AddItem(Item(ItemType::HPPotion, 5));
-        player->Inven->AddItem(Item(ItemType::MPPotion, 5));
+    // =================================== 도전과제 1 요구사항 =======================================
+    int* hpPotionCount = nullptr;
+    int* mpPotionCount = nullptr;
+
+    auto HPPotionItem = Item(ItemType::HPPotion, 5);
+    auto MPPotionItem = Item(ItemType::MPPotion, 5);
+
+    player->Inven->AddItem(HPPotionItem);
+    player->Inven->AddItem(MPPotionItem);
+
+    for (auto& [item, count] : *player->Inven) {
+        if (item == HPPotionItem) {
+            hpPotionCount = &count;
+        }
+        else if (item == MPPotionItem) {
+            mpPotionCount = &count;
+        }
     }
+
+    player->SetPotion(5, hpPotionCount, mpPotionCount);
 
     std::cout << "* You received 5 HP Potions and 5 MP Potions." << std::endl;
     std::cout << "Start Game!!!(press any key to continue)" << std::endl;
@@ -95,7 +115,18 @@ Enter your hero's name: )";
         controller.ProcessInput();
 
         // 4. 입력 파싱 (중복 코드 제거)
-        int ch = std::stoi(lastCommand.empty() ? "-1" : lastCommand);
+        int ch = -1;
+        if (!lastCommand.empty()) {
+            try {
+                ch = std::stoi(lastCommand);
+            }
+            catch (const std::invalid_argument&) {
+                ch = -1;
+            }
+            catch (const std::out_of_range&) {
+                ch = -1;
+            }
+        }
 
         // 5. 상태 분기 (if -> switch 구조 개선)
         switch (CURRENT_STAGE) {
@@ -114,7 +145,7 @@ Enter your hero's name: )";
             UIManager::SetContext(UIPart::CenterLeft, 5, "6. QUIT");
 
             switch (ch) {
-            case 1: CURRENT_STAGE = Stage::Battle; break;
+            case 1: CURRENT_STAGE = Stage::BattleMap; break; // [수정됨] 바로 전투로 안 가고 맵으로 이동
             case 2: CURRENT_STAGE = Stage::JobSelection; break;
             case 3: CURRENT_STAGE = Stage::CharacterUpgrade; break;
             case 4: CURRENT_STAGE = Stage::Inventory; break;
@@ -123,57 +154,133 @@ Enter your hero's name: )";
             }
             break;
         }
+
+        case Stage::BattleMap: // [신규 구현] 원하는 방 선택
+        {
+            ClearAllCenterLeftUI();
+            UIManager::DisplayStatus();
+            UIManager::SetContext(UIPart::Top, 0, "Dungeon Map");
+            UIManager::SetContext(UIPart::CenterLeft, 0, "Select a Dungeon Room to enter:");
+
+            // GameManager에서 현재 해금된 진행도를 가져옵니다.
+            int unlockedRoom = GameManager::GetInstance().GetProgression();
+
+            // 해금된 층수까지만 입장 메뉴를 띄워줍니다. (최대 4층 = 인덱스 3)
+            for (int i = 0; i <= unlockedRoom; ++i) {
+                if (i > 3) break;
+                UIManager::SetContext(UIPart::CenterLeft, i + 1, std::to_string(i + 1) + ". Enter Floor " + std::to_string(i + 1));
+            }
+            UIManager::SetContext(UIPart::CenterLeft, 12, "0. Back to Main Menu");
+
+            // 유저 입력 처리
+            if (ch == 0) {
+                CURRENT_STAGE = Stage::MainMenu;
+            }
+            // 입력한 번호가 1 이상이고, 해금된 층수 이하일 때만 입장 허용
+            else if (ch > 0 && ch <= unlockedRoom + 1 && ch <= 4) {
+                GameManager::GetInstance().TrySetProgression(ch - 1); // 선택한 방으로 세팅
+                GameManager::GetInstance().SpawnMonster();         // 해당 방의 몬스터 스폰
+
+                ClearAllCenterLeftUI();
+                CURRENT_STAGE = Stage::Battle;
+            }
+            else if (ch != -1) {
+                UIManager::SetContext(UIPart::CenterLeft, 11, "Locked or Invalid room!");
+            }
+            break;
+        }
+
         case Stage::Battle:
         {
             PREVIOUS_STAGE = Stage::Battle;
             Monster* const& monster = GameManager::GetInstance().GetMonster();
 
-            // damage 공식
-            auto damageFormular = [&](const Character& a, const Character& b) {
-                return a.GetAttack() - b.GetDefense() > 0 ? a.GetAttack() - b.GetDefense() : 1;
-                };
+            // [수정됨] 전역 변수 대신 GameManager의 getter 사용
+            int currentFloor = GameManager::GetInstance().GetProgression() + 1;
 
+            ClearAllCenterLeftUI();
             UIManager::DisplayStatus();
-            UIManager::SetContext(UIPart::Top, 0, "Dungeon: " + std::to_string(PROGRESSION + 1) + " floor");
+            UIManager::SetContext(UIPart::Top, 0, "Dungeon: " + std::to_string(currentFloor) + " floor");
             UIManager::SetContext(UIPart::CenterLeft, 0, "Enemy: " + monster->Name);
             UIManager::SetContext(UIPart::CenterLeft, 1, "HP: " + std::to_string(monster->GetHp()) + "/" + std::to_string(monster->MaxHp));
             UIManager::SetContext(UIPart::CenterLeft, 2, "ATK: " + std::to_string(monster->GetAttack()));
             UIManager::SetContext(UIPart::CenterLeft, 3, "DEF: " + std::to_string(monster->GetDefense()));
-            UIManager::SetContext(UIPart::CenterLeft, 4, "");
-            UIManager::SetContext(UIPart::CenterLeft, 5, "");
             UIManager::SetContext(UIPart::CenterLeft, 9, "Choose your strategy");
             UIManager::SetContext(UIPart::CenterLeft, 10, "1. Attack");
             UIManager::SetContext(UIPart::CenterLeft, 11, "2. Inventory");
             UIManager::SetContext(UIPart::CenterLeft, 12, "0. Retreat");
 
             switch (ch) {
-            case 0: CURRENT_STAGE = Stage::MainMenu; break;
+            case 0:
+                ClearAllCenterLeftUI();
+                CURRENT_STAGE = Stage::BattleMap; // [수정됨] 도망치면 맵으로 복귀
+                break;
             case 1:
-                player->SetHp(player->GetHp() - damageFormular(*monster, *player));
-                monster->SetHp(monster->GetHp() - damageFormular(*player, *monster));
+                UIManager::SetContext(UIPart::CenterLeft, 4, player->AttackEnemy(monster));
+                UIManager::SetContext(UIPart::CenterLeft, 5, monster->AttackEnemy(player));
 
-                UIManager::SetContext(UIPart::CenterLeft, 4, player->AttackEnemy());
-                UIManager::SetContext(UIPart::CenterLeft, 5, monster->AttackEnemy());
+                if (monster->GetHp() <= 0 || player->GetHp() <= 0) {
+                    CURRENT_STAGE = Stage::BattleReward;
+                }
+                break;
+            case 2: CURRENT_STAGE = Stage::Inventory; break;
+            }
+            break;
+        }
 
-                if (monster->GetHp() <= 0) {
-                    // 보상
-                    player->LevelUp();
+        case Stage::BattleReward:
+        {
+            PREVIOUS_STAGE = Stage::Battle;
+            Monster* const& monster = GameManager::GetInstance().GetMonster();
+
+            // [수정됨] PROGRESSION 에러 방지
+            int currentFloor = GameManager::GetInstance().GetProgression() + 1;
+
+            ClearAllCenterLeftUI();
+            UIManager::DisplayStatus();
+
+            bool isVictory = (player->GetHp() > 0);
+
+            if (isVictory) {
+                int rewardExp = 30; // 임시 경험치
+
+                UIManager::SetContext(UIPart::Top, 0, "Dungeon: " + std::to_string(currentFloor) + " floor - CLEAR!");
+                UIManager::SetContext(UIPart::CenterLeft, 0, "  < VICTORY >  ");
+                UIManager::SetContext(UIPart::CenterLeft, 2, "- Obtained Item: " + monster->dropItem.Name);
+                UIManager::SetContext(UIPart::CenterLeft, 3, "- Gained EXP: " + std::to_string(rewardExp));
+            }
+            else {
+                UIManager::SetContext(UIPart::Top, 0, "Dungeon: " + std::to_string(currentFloor) + " floor - FAILED");
+                UIManager::SetContext(UIPart::CenterLeft, 0, "  < DEFEAT >  ");
+                UIManager::SetContext(UIPart::CenterLeft, 2, "You have fallen...");
+            }
+
+            UIManager::SetContext(UIPart::CenterLeft, 12, "0. Next");
+
+            switch (ch) {
+            case 0:
+                if (!isVictory) {
+                    CURRENT_STAGE = Stage::GameDefeat;
+                }
+                else {
+                    // 승리 보상 지급
+                    player->GainExp(30);
                     player->Inven->AddItem(monster->dropItem);
 
-                    // 다음 몬스터 스폰 및 스테이지 진행
-                    PROGRESSION++;
-                    GameManager::GetInstance().SpawnMonster();
+                    // 최고 기록 갱신 (만약 지금 깬 방이 내 최고 도달 층수라면 다음 방 해금)
+                    GameManager::GetInstance().AdvanceProgression();
 
                     ClearAllCenterLeftUI();
 
-                    if(PROGRESSION > 3)
+                    // 마지막 4층을 깼다면 게임 클리어, 아니면 배틀 맵으로 복귀시켜 다시 선택하게 함
+                    if (currentFloor >= 4) {
                         CURRENT_STAGE = Stage::GameClear;
-                    else
-                        CURRENT_STAGE = Stage::MainMenu;
+                    }
+                    else {
+                        CURRENT_STAGE = Stage::BattleMap;
+                    }
                 }
-
                 break;
-            case 2: CURRENT_STAGE = Stage::Inventory; break;
             }
             break;
         }
@@ -223,30 +330,72 @@ Enter your hero's name: )";
         }
         case Stage::Inventory:
         {
-            UIManager::DisplayInventory();
-            UIManager::SetContext(UIPart::Top, 0, "Inventory");
-            UIManager::SetContext(UIPart::CenterLeft, 12, "0. Back to Main Menu");
+            Player* player = GameManager::GetInstance().GetPlayer();
+            auto& items = player->Inven; // items는 Inventory<Item>* 타입
 
-            switch (ch) {
-            case 0:
+            UIManager::DisplayInventory();
+            UIManager::DisplayStatus();
+            UIManager::SetContext(UIPart::Top, 0, "Inventory");
+            UIManager::SetContext(UIPart::CenterLeft, 10, "99. Sort Item List by price");
+            UIManager::SetContext(UIPart::CenterLeft, 11, "Select item number to use.");
+            UIManager::SetContext(UIPart::CenterLeft, 12, "0. Back to Menu");
+
+            // 유저 입력 처리
+            if (ch == 0) {
                 switch (PREVIOUS_STAGE) {
-                case Stage::MainMenu:
-                    CURRENT_STAGE = Stage::MainMenu;
-                    break;
-                case Stage::Battle:
-                    CURRENT_STAGE = Stage::Battle;
+                case Stage::MainMenu: CURRENT_STAGE = Stage::MainMenu; break;
+                case Stage::Battle: CURRENT_STAGE = Stage::Battle; break;
                 }
+                UIManager::SetContext(UIPart::CenterLeft, 11, "");
                 UIManager::SetContext(UIPart::CenterLeft, 12, "");
-                break;
             }
+            else if (ch == 99) {
+                items->SortItems([](const auto& a, const auto& b) { return a.first.Price < b.first.Price; });
+            }
+            // 입력 번호가 1 이상이고, 현재 인벤토리 아이템 종류 개수 이하일 때
+            else if (ch > 0 && ch <= items->GetSize()) {
+
+                Item selectedItem = (*items)[ch - 1].first;
+
+                if (player->Inven->TryUseItem(selectedItem)) {
+                    switch (selectedItem.Type) {
+                    case ItemType::HPPotion:
+                        player->SetHp(player->GetHp() + 50);
+                        UIManager::SetContext(UIPart::CenterLeft, 11, "Used HP Potion! (HP +50)");
+                        player->Inven->AddItem(Item{ ItemType::EmptyBottle, 0 });
+                        break;
+
+                    case ItemType::MPPotion:
+                        player->Mp += 50;
+                        if (player->Mp > player->MaxMp) player->Mp = player->MaxMp;
+                        UIManager::SetContext(UIPart::CenterLeft, 11, "Used MP Potion! (MP +50)");
+                        player->Inven->AddItem(Item{ ItemType::EmptyBottle, 0 });
+                        break;
+
+                    default:
+                        UIManager::SetContext(UIPart::CenterLeft, 11, "Used an item with no specific effect.");
+                        break;
+                    }
+                }
+                else {
+                    UIManager::SetContext(UIPart::CenterLeft, 11, "Cannot use this item.");
+                }
+            }
+            else if (ch != -1) {
+                UIManager::SetContext(UIPart::CenterLeft, 11, "Invalid item number!");
+            }
+
             break;
         }
         case Stage::CharacterUpgrade:
         {
+            auto hpPotion = Item(ItemType::HPPotion, 5);
+            auto mpPotion = Item(ItemType::MPPotion, 5);
+
             UIManager::DisplayStatus();
             UIManager::SetContext(UIPart::Top, 0, "Character Upgrade");
-            UIManager::SetContext(UIPart::CenterLeft, 0, "1. HP UP - " + std::to_string(player->Inven->Items[Item(ItemType::HPPotion, 5)]) + " left");
-            UIManager::SetContext(UIPart::CenterLeft, 1, "2. MP UP - " + std::to_string(player->Inven->Items[Item(ItemType::MPPotion, 5)]) + " left");
+            UIManager::SetContext(UIPart::CenterLeft, 0, "1. HP UP - " + std::to_string(player->Inven->GetItemCount(hpPotion)) + " left");
+            UIManager::SetContext(UIPart::CenterLeft, 1, "2. MP UP - " + std::to_string(player->Inven->GetItemCount(mpPotion)) + " left");
             UIManager::SetContext(UIPart::CenterLeft, 2, "3. Attack x 2");
             UIManager::SetContext(UIPart::CenterLeft, 3, "4. Defense x 2");
             UIManager::SetContext(UIPart::CenterLeft, 4, "");
@@ -264,6 +413,7 @@ Enter your hero's name: )";
                     player->SetHp(player->GetHp() + 20);
                     player->MaxHp += 20;
                     UIManager::SetContext(UIPart::CenterLeft, 11, "HP increased by 20");
+                    player->Inven->AddItem(Item{ ItemType::EmptyBottle, 0 });
                 }
                 else {
                     UIManager::SetContext(UIPart::CenterLeft, 11, "No HP Potion left");
@@ -274,6 +424,7 @@ Enter your hero's name: )";
                     player->Mp += 20;
                     player->MaxMp += 20;
                     UIManager::SetContext(UIPart::CenterLeft, 11, "MP increased by 20");
+                    player->Inven->AddItem(Item{ ItemType::EmptyBottle, 0 });
                 }
                 else {
                     UIManager::SetContext(UIPart::CenterLeft, 11, "No MP Potion left");
@@ -290,22 +441,210 @@ Enter your hero's name: )";
             }
             break;
         }
+    #pragma region Alchemy
         case Stage::AlchemyWorkshop:
         {
+            Alchemyworkshop* workshop = GameManager::GetInstance().GetAlchemyworkshop();
+
+            ClearAllCenterLeftUI();
             UIManager::DisplayStatus();
             UIManager::SetContext(UIPart::Top, 0, "Alchemy Workshop");
-
-            for (int i = 0; i <= 5; ++i) UIManager::SetContext(UIPart::CenterLeft, i, "");
+            UIManager::SetContext(UIPart::CenterLeft, 0, "=== Potion Shop ===");
+            UIManager::SetContext(UIPart::CenterLeft, 1, "1. Show all recipes");
+            UIManager::SetContext(UIPart::CenterLeft, 2, "2. Search by potion name");
+            UIManager::SetContext(UIPart::CenterLeft, 3, "3. Search by ingredient");
+            UIManager::SetContext(UIPart::CenterLeft, 4, "4. Dispense Potion");
+            UIManager::SetContext(UIPart::CenterLeft, 5, "5. Return Empty Bottle");
             UIManager::SetContext(UIPart::CenterLeft, 12, "0. Back to Main Menu");
 
             switch (ch) {
             case 0:
                 CURRENT_STAGE = Stage::MainMenu;
-                UIManager::SetContext(UIPart::CenterLeft, 12, "");
+                ClearAllCenterLeftUI();
+                break;
+            case 1:
+                CURRENT_STAGE = Stage::AlchemyWorkshopShow;
+                break;
+            case 2:
+                READ_MODE = true;
+                currentQuery.clear();
+                CURRENT_STAGE = Stage::AlchemyWorkshopSearchByName;
+                break;
+            case 3:
+                READ_MODE = true;
+                currentQuery.clear();
+                CURRENT_STAGE = Stage::AlchemyWorkshopSearchByIngredient;
+                break;
+            case 4:
+                READ_MODE = true;
+                currentQuery.clear();
+                CURRENT_STAGE = Stage::AlchemyWorkshopDispense;
+                break;
+            case 5:
+                READ_MODE = true;
+                currentQuery.clear();
+                CURRENT_STAGE = Stage::AlchemyWorkshopReturn;
                 break;
             }
             break;
         }
+        case Stage::AlchemyWorkshopShow:
+        {
+            Alchemyworkshop* workshop = GameManager::GetInstance().GetAlchemyworkshop();
+
+            ClearAllCenterLeftUI();
+            UIManager::DisplayStatus();
+            workshop->ShowAllRecipes();
+            UIManager::SetContext(UIPart::Top, 0, "Alchemy Workshop Show");
+            UIManager::SetContext(UIPart::CenterLeft, 12, "0. Back to Potion Shop");
+                        
+            switch (ch) {
+            case 0:
+                READ_MODE = false;
+                CURRENT_STAGE = Stage::AlchemyWorkshop;
+                ClearAllCenterLeftUI();
+                break;
+            }
+            break;
+        }
+        case Stage::AlchemyWorkshopSearchByName:
+        {
+            Alchemyworkshop* workshop = GameManager::GetInstance().GetAlchemyworkshop();
+
+            ClearAllCenterLeftUI();
+            UIManager::DisplayStatus();
+            UIManager::SetContext(UIPart::Top, 0, "Alchemy Workshop Search by name");
+            UIManager::SetContext(UIPart::CenterLeft, 12, "0. Back to Potion Shop");
+
+            if (ch == 0) {
+                READ_MODE = false;
+                currentQuery.clear();
+                CURRENT_STAGE = Stage::AlchemyWorkshop;
+                break;
+            }
+            else if (!lastCommand.empty()) {
+                currentQuery = lastCommand; // 입력된 검색어를 기억함
+            }
+
+            if (currentQuery.empty()) {
+                UIManager::SetContext(UIPart::CenterLeft, 0, "Read Mode is available");
+                UIManager::SetContext(UIPart::CenterLeft, 1, "Type Recipe name you find:");
+            }
+            else {
+                workshop->SearchByName(currentQuery);
+            }
+            break;
+        }
+        case Stage::AlchemyWorkshopSearchByIngredient:
+        {
+            Alchemyworkshop* workshop = GameManager::GetInstance().GetAlchemyworkshop();
+
+            ClearAllCenterLeftUI();
+            UIManager::DisplayStatus();
+            UIManager::SetContext(UIPart::Top, 0, "Alchemy Workshop Search by ingredient");
+            UIManager::SetContext(UIPart::CenterLeft, 12, "0. Back to Potion Shop");
+
+            if (ch == 0) {
+                READ_MODE = false;
+                currentQuery.clear();
+                CURRENT_STAGE = Stage::AlchemyWorkshop;
+                break;
+            }
+            else if (!lastCommand.empty()) {
+                currentQuery = lastCommand;
+            }
+
+            if (currentQuery.empty()) {
+                UIManager::SetContext(UIPart::CenterLeft, 0, "Read Mode is available");
+                UIManager::SetContext(UIPart::CenterLeft, 1, "Type Ingredient name you find:");
+            }
+            else {
+                workshop->SearchByIngredient(currentQuery);
+            }
+            break;
+        }
+        case Stage::AlchemyWorkshopDispense:
+        {
+            Alchemyworkshop* workshop = GameManager::GetInstance().GetAlchemyworkshop();
+            Player* player = GameManager::GetInstance().GetPlayer(); // 인벤토리 접근용
+
+            ClearAllCenterLeftUI();
+            UIManager::DisplayStatus();
+            UIManager::SetContext(UIPart::Top, 0, "Alchemy Workshop - Dispense");
+            UIManager::SetContext(UIPart::CenterLeft, 12, "0. Back to Potion Shop");
+
+            if (ch == 0) {
+                READ_MODE = false;
+                currentQuery.clear();
+                CURRENT_STAGE = Stage::AlchemyWorkshop;
+                break;
+            }
+            else if (!lastCommand.empty()) {
+                std::string targetPotion = lastCommand;
+                lastCommand.clear();
+
+                if (workshop->DispensePotion(targetPotion)) {
+
+                     if(targetPotion == "HPPotion") player->Inven->AddItem(Item{ ItemType::HPPotion, 5 });
+                     if(targetPotion == "MPPotion") player->Inven->AddItem(Item{ ItemType::MPPotion, 5 });
+
+                    currentQuery = "Dispense " + targetPotion + " (stock: " + std::to_string(workshop->GetStock(targetPotion)) + ")";
+                }
+                else {
+                    currentQuery = "Dispense failed";
+                }
+            }
+                        
+            UIManager::SetContext(UIPart::CenterLeft, 0, "Type Potion Name to Dispense:");
+            UIManager::SetContext(UIPart::CenterLeft, 1, currentQuery);
+
+            // 전체 재고 현황을 보여줌
+            int line = 3;
+            UIManager::SetContext(UIPart::CenterLeft, line++, "[ Current Stock ]");
+            for (const auto& r : workshop->GetRecipes()) { 
+                UIManager::SetContext(UIPart::CenterLeft, line++, "- " + r.Name + " : " + std::to_string(workshop->GetStock(r.Name)));
+            }
+            break;
+        }
+        case Stage::AlchemyWorkshopReturn:
+        {
+            Alchemyworkshop* workshop = GameManager::GetInstance().GetAlchemyworkshop();
+            Player* player = GameManager::GetInstance().GetPlayer();
+
+            ClearAllCenterLeftUI();
+            UIManager::DisplayStatus();
+            UIManager::SetContext(UIPart::Top, 0, "Alchemy Workshop - Return Bottle");
+            UIManager::SetContext(UIPart::CenterLeft, 12, "0. Back to Potion Shop");
+
+            if (ch == 0) {
+                READ_MODE = false;
+                currentQuery.clear();
+                CURRENT_STAGE = Stage::AlchemyWorkshop;
+                break;
+            }
+            else if (!lastCommand.empty()) {
+                std::string targetPotion = lastCommand;
+                lastCommand.clear();
+
+                if (player->Inven->TryUseItem(Item{ ItemType::EmptyBottle, 0 }) && workshop->ReturnPotion(targetPotion)) {
+                    currentQuery = "Return empty bottle for " + targetPotion + " - " + std::to_string(workshop->GetStock(targetPotion)) + " EA";
+                }
+                else {
+                    currentQuery = "Return failed";
+                }
+            }
+
+            UIManager::SetContext(UIPart::CenterLeft, 0, "Type Potion Name to Return Bottle:");
+            UIManager::SetContext(UIPart::CenterLeft, 1, currentQuery);
+
+            int line = 3;
+            UIManager::SetContext(UIPart::CenterLeft, line++, "[ Current Stock ]");
+            for (const auto& r : workshop->GetRecipes()) {
+                UIManager::SetContext(UIPart::CenterLeft, line++, "- " + r.Name + " : " + std::to_string(workshop->GetStock(r.Name)));
+            }
+            break;
+        }
+    #pragma endregion
         case Stage::GameClear: 
         {
             GameManager::GetInstance().IsGameRunning = false;
@@ -320,6 +659,25 @@ Enter your hero's name: )";
             // 입력을 대기하여 바로 종료되지 않게 함
             std::string temp;
             std::cin >> temp;
+
+            break;
+        }
+        case Stage::GameDefeat: 
+        {
+            GameManager::GetInstance().IsGameRunning = false;
+            // 화면을 지우고 커서를 맨 위(1, 1)로 이동
+            std::cout << "\033[2J\033[1;1H";
+
+            for (int i = 0; i < 15; ++i) {
+                std::cout << "Game over" << std::endl;
+            }
+                std::cout << "Enter any key to exit!" << std::endl;
+
+            // 입력을 대기하여 바로 종료되지 않게 함
+            std::string temp;
+            std::cin >> temp;
+
+            break;
         }
         } // switch(CURRENT_STAGE) 종료
 

@@ -1,14 +1,35 @@
 #include "GameManager.h"
 #include "Player.h"
-#include "Monster.h"
-#include "Goblin.h"
-#include "Slime.h"
-#include "Dragon.h"
-#include "Orc.h"
+#include "DungeonRoom.h"
+#include "Alchemyworkshop.h"
+#include "Item.h"
 
-GameManager::~GameManager(){
+GameManager::GameManager() {
+    ALCHEMY_WORKSHOP = new Alchemyworkshop();
+
+    for (int i = 0; i < ROOM_SIZE; ++i) {
+        ROOM[i] = new DungeonRoom(i);
+    }
+}
+
+GameManager::~GameManager() {
     delete PLAYER;
+    PLAYER = nullptr;
     delete MONSTER;
+    MONSTER = nullptr;
+    delete ALCHEMY_WORKSHOP;
+    ALCHEMY_WORKSHOP = nullptr;
+
+    for (int i = 0; i < ROOM_SIZE; ++i) {
+        if (ROOM[i]) {
+            delete ROOM[i];
+            ROOM[i] = nullptr;
+        }
+    }
+}
+
+Alchemyworkshop* GameManager::GetAlchemyworkshop() {
+    return ALCHEMY_WORKSHOP;
 }
 
 void GameManager::MakePlayer() {
@@ -23,7 +44,7 @@ Player* GameManager::GetPlayer() {
 }
 
 Player* GameManager::SetPlayer(Player* newPlayer) {
-    Inventory* inv = nullptr;
+    Inventory<Item>* inv = nullptr;
 
     if (PLAYER) {
         inv = PLAYER->Inven; // 기존 플레이어의 인벤토리 저장
@@ -41,25 +62,31 @@ Monster* GameManager::GetMonster() {
 }
 
 Monster* GameManager::SpawnMonster() {
-
     if (MONSTER) {
-        delete MONSTER; // 기존 플레이어 메모리 해제
+        delete MONSTER; // 기존 몬스터 메모리 해제
+        MONSTER = nullptr; // Dangling Pointer 방지
     }
 
-    switch (PROGRESSION) {
-    case 0:
-        MONSTER = new Slime(std::string("Slime"), 50, 10, 1, 1, Item(ItemType::SlimeJelly, 1));
-        break;
-    case 1:
-        MONSTER = new Goblin(std::string("Goblin"), 100, 21, 3, 1, Item(ItemType::GoblinEar, 3));
-        break;
-    case 2:
-        MONSTER = new Orc(std::string("Orc"), 200, 51, 5, 3, Item(ItemType::OrcHead, 5));
-        break;
-    default:
-        MONSTER = new Dragon(std::string("Dragon"), 1000, 100, 20, 10, Item(ItemType::DragonHorn, 10));
-        break;
-    }
+    MONSTER = ROOM[PROGRESSION]->SpawnRoomMonster();
 
     return MONSTER;
+}
+
+int GameManager::GetProgression() const {
+    return PROGRESSION;
+}
+
+void GameManager::AdvanceProgression() {
+    if (PROGRESSION < ROOM_SIZE - 1) {
+        PROGRESSION++;
+    }
+}
+
+bool GameManager::TrySetProgression(int k) {
+    if (k > ROOM_SIZE - 1 || k < 0) {
+        return false; // 유효하지 않은 방 번호면 실패 반환
+    }
+
+    PROGRESSION = k;
+    return true;  // 성공적으로 세팅됨
 }

@@ -7,6 +7,7 @@ inline const auto FRAME_DURATION = std::chrono::milliseconds(1000 / TARGET_FPS);
 inline int FRAMECOUNT = 0;
 inline const int SCREEN_WIDTH = 60;
 inline const int SCREEN_HEIGHT = 20;
+inline bool READ_MODE = false;
 
 // 상수
 enum class ItemType {
@@ -17,6 +18,7 @@ enum class ItemType {
     Shield,
 
     // 재료 아이템
+    EmptyBottle,
     SlimeJelly,
     GoblinEar,
     OrcHead,
@@ -29,12 +31,24 @@ enum class Stage {
     Inventory,
     CharacterUpgrade,
     JobSelection,
+
+    // 배틀 분기
     Battle,
+    BattleMap,
+    BattleReward,
+
+    // 포션 제작소 분기
     AlchemyWorkshop,
+    AlchemyWorkshopShow,
+    AlchemyWorkshopSearchByName,
+    AlchemyWorkshopSearchByIngredient,
+    AlchemyWorkshopDispense,
+    AlchemyWorkshopReturn,
+
     GameClear,
+    GameDefeat,
 };
 
 // 게임 변수
 inline Stage CURRENT_STAGE = Stage::GameStart;
 inline Stage PREVIOUS_STAGE = Stage::MainMenu;
-inline int PROGRESSION = 0;

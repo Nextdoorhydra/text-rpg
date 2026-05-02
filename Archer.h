@@ -8,8 +8,18 @@ public:
         attack += 30;
     }
 
-    std::string AttackEnemy() override {
-        return std::string("Archer's Attack!");
+    std::string AttackEnemy(Character* enemy) override {        
+        if (!enemy)
+            return std::string("");
+
+        int damage = GetAttack() - enemy->GetDefense() > 0 ? GetAttack() - enemy->GetDefense() : 1;
+        damage = damage / 3 > 0 ? damage / 3 : 1;
+
+        enemy->SetHp(enemy->GetHp() - damage);
+        enemy->SetHp(enemy->GetHp() - damage);
+        enemy->SetHp(enemy->GetHp() - damage);
+
+        return std::string("Archer's 3-Chain Attack!");
     }
 
     std::string WhoAmI() override {

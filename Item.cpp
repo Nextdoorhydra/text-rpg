@@ -7,10 +7,10 @@ Item::Item(ItemType type, int price) {
 
     switch (type) {
     case ItemType::HPPotion:
-        this->Name = "HP Potion";
+        this->Name = "HPPotion";
         break;
     case ItemType::MPPotion:
-        this->Name = "MP Potion";
+        this->Name = "MPPotion";
         break;
     case ItemType::Sword:
         this->Name = "Sword";
@@ -19,22 +19,21 @@ Item::Item(ItemType type, int price) {
         this->Name = "Shield";
         break;
     case ItemType::GoblinEar:
-        this->Name = "Goblin Ear";
+        this->Name = "GoblinEar";
         break;
     case ItemType::SlimeJelly:
-        this->Name = "Slime Jelly";
+        this->Name = "SlimeJelly";
         break;
     case ItemType::DragonHorn:
-        this->Name = "Dragon Horn";
+        this->Name = "DragonHorn";
         break;
     case ItemType::OrcHead:
-        this->Name = "Orc Head";
+        this->Name = "OrcHead";
+        break;
+    case ItemType::EmptyBottle:
+        this->Name = "EmptyBottle";
         break;
     }
-}
-
-bool Item::operator<(const Item& other) const {
-    return this->Name < other.Name;
 }
 
 void Item::PrintInfo() const {

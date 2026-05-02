@@ -1,6 +1,7 @@
 #include "Controller.h"
 #include "GameManager.h"
 #include "UIManager.h"
+#include "Configuration.h"
 #include <conio.h> // Windows Àü¿ë: _kbhit(), _getch()
 
 void Controller::ProcessInput() {
@@ -16,6 +17,9 @@ void Controller::ProcessInput() {
         }
         else if (ch == '\b') { // Backspace
             if (!inputBuffer.empty()) inputBuffer.pop_back();
+        }
+        else if (READ_MODE) {
+            inputBuffer += ch;
         }
         else if (inputBuffer.length() < 6 && ch >= 48 && ch <= 57) {
             inputBuffer += ch;

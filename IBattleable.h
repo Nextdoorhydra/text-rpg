@@ -3,5 +3,5 @@
 
 class IBattleable {
 public:
-    virtual std::string AttackEnemy() = 0;
+    virtual std::string AttackEnemy(Character* s) = 0;
 };
