@@ -3,6 +3,7 @@
 #include "DungeonRoom.h"
 #include "Alchemyworkshop.h"
 #include "Item.h"
+#include "IGameState.h"
 
 GameManager::GameManager() {
     ALCHEMY_WORKSHOP = new Alchemyworkshop();
@@ -13,6 +14,8 @@ GameManager::GameManager() {
 }
 
 GameManager::~GameManager() {
+    delete CURRENT_STATE;
+    CURRENT_STATE = nullptr;
     delete PLAYER;
     PLAYER = nullptr;
     delete MONSTER;
@@ -26,6 +29,17 @@ GameManager::~GameManager() {
             ROOM[i] = nullptr;
         }
     }
+}
+
+void GameManager::SetCurrentState(IGameState* newState) {
+    if (CURRENT_STATE != nullptr) {
+        delete CURRENT_STATE;
+    }
+    CURRENT_STATE = newState;
+}
+
+IGameState* GameManager::GetCurrentState() {
+    return CURRENT_STATE;
 }
 
 Alchemyworkshop* GameManager::GetAlchemyworkshop() {

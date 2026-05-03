@@ -6,14 +6,30 @@
 #include "Controller.h"
 #include <iostream>
 
+// 애니메이션 분기를 위한 상태 클래스 헤더 포함
+#include "BattleMapState.h"
+#include "MainMenuState.h"
+#include "InventoryState.h"
+#include "JobSelectionState.h"
+#include "CharacterUpgradeState.h"
+#include "BattleState.h"
+#include "BattleRewardState.h"
+#include "AlchemyWorkshopState.h"
+#include "AlchemyWorkshopShowState.h"
+#include "AlchemyWorkshopSearchByNameState.h"
+#include "AlchemyWorkshopSearchByIngredientState.h"
+#include "AlchemyWorkshopDispenseState.h"
+#include "AlchemyWorkshopReturnState.h"
+
 #pragma region Animation
 void UIManager::DisplayASCIIAnimation() {
+    IGameState* currentState = GameManager::GetInstance().GetCurrentState();
+    if (!currentState) return;
+
     const std::vector<std::vector<std::string>>* targetFrames = nullptr;
     int frameSpeed = 10;
 
-    switch (CURRENT_STAGE) {
-    case Stage::BattleMap:
-    case Stage::GameStart: {
+    if (dynamic_cast<BattleMapState*>(currentState)) {
         static std::vector<std::vector<std::string>> portal = {
             { "                ", "     .---.      ", "   /  . .  \\    ", "   \\  . .  /    ", "     '---'      ", "                " },
             { "                ", "     .---.      ", "   /  / \\  \\    ", "   \\  \\ /  /    ", "     '---'      ", "                " },
@@ -24,9 +40,8 @@ void UIManager::DisplayASCIIAnimation() {
         };
         targetFrames = &portal;
         frameSpeed = 6;
-        break;
     }
-    case Stage::MainMenu: {
+    else if (dynamic_cast<MainMenuState*>(currentState)) {
         static std::vector<std::vector<std::string>> banner = {
             { "  |~~~==~~~|    ", "  |  HERO  |    ", "  |        |    ", "  |  TOWN  |    ", "  |  \\  /  |    ", "  |___\\/___|    " },
             { "   |~~==~~|     ", "   | HERO |     ", "   |      |     ", "   | TOWN |     ", "   | \\  / |     ", "   |__\\/__|     " },
@@ -35,9 +50,8 @@ void UIManager::DisplayASCIIAnimation() {
         };
         targetFrames = &banner;
         frameSpeed = 12;
-        break;
     }
-    case Stage::Inventory: {
+    else if (dynamic_cast<InventoryState*>(currentState)) {
         static std::vector<std::vector<std::string>> chest = {
             { "                ", "   __________   ", "  /         /|  ", " +---------+ |  ", " |  [___]  | /  ", " +---------+/   " },
             { "                ", "   .--------.   ", "  /___    _ /|  ", " +----'--'-+ |  ", " |         | /  ", " +---------+/   " },
@@ -46,9 +60,8 @@ void UIManager::DisplayASCIIAnimation() {
         };
         targetFrames = &chest;
         frameSpeed = 10;
-        break;
     }
-    case Stage::JobSelection: {
+    else if (dynamic_cast<JobSelectionState*>(currentState)) {
         static std::vector<std::vector<std::string>> weapons = {
             { "       /\\       ", "       ||       ", "       ||       ", "      ====      ", "       ||       ", "       ()       " },
             { "      (  )      ", "       )(       ", "      (  )      ", "       ||       ", "       ||       ", "       ||       " },
@@ -57,9 +70,8 @@ void UIManager::DisplayASCIIAnimation() {
         };
         targetFrames = &weapons;
         frameSpeed = 15;
-        break;
     }
-    case Stage::CharacterUpgrade: {
+    else if (dynamic_cast<CharacterUpgradeState*>(currentState)) {
         static std::vector<std::vector<std::string>> crystal = {
             { "        +       ", "       / \\      ", "      <   >     ", "       \\ /      ", "        v       ", "                " },
             { "       .+.      ", "      /   \\     ", "     <     >    ", "      \\   /     ", "       'v'      ", "                " },
@@ -69,22 +81,19 @@ void UIManager::DisplayASCIIAnimation() {
         };
         targetFrames = &crystal;
         frameSpeed = 8;
-        break;
     }
-    case Stage::BattleReward:
-    case Stage::Battle: {
-        // PROGRESSION에 따른 몬스터 분기
-        if (GameManager::GetInstance().GetProgression() == 0) { // Slime
+    else if (dynamic_cast<BattleState*>(currentState) || dynamic_cast<BattleRewardState*>(currentState)) {
+        if (GameManager::GetInstance().GetProgression() == 0) {
             static std::vector<std::vector<std::string>> slime = {
                 { "                ", "      .---.     ", "     / o o \\    ", "    (   \"   )   ", "     '-----'    ", "                " },
                 { "                ", "                ", "     .---.      ", "    / - o \\     ", "   (   V   )    ", "                " },
-                { "       .-.      ", "      / o o\\    ", "     |  \"   |   ", "      '---'     ", "                ", "                " },
+                { "       .-.      ", "      / o o\\    ", "     |  \"  |    ", "      '---'     ", "                ", "                " },
                 { "                ", "      .---.     ", "     / o o \\    ", "    (   ~   )   ", "     '-----'    ", "                " }
             };
             targetFrames = &slime;
             frameSpeed = 10;
         }
-        else if (GameManager::GetInstance().GetProgression() == 1) { // Goblin
+        else if (GameManager::GetInstance().GetProgression() == 1) {
             static std::vector<std::vector<std::string>> goblin = {
                 { "  <  ò  ó  >    ", "   \\  vv  /     ", "    |    |      ", "   /|    |\\     ", "    |____|      ", "                " },
                 { "  <  ó  ò  >    ", "   \\  vv  /     ", "    |    |      ", "   /|    |\\     ", "    |____|      ", "                " }
@@ -92,7 +101,7 @@ void UIManager::DisplayASCIIAnimation() {
             targetFrames = &goblin;
             frameSpeed = 12;
         }
-        else if (GameManager::GetInstance().GetProgression() == 2) { // Orc
+        else if (GameManager::GetInstance().GetProgression() == 2) {
             static std::vector<std::vector<std::string>> orc = {
                 { "   (  ò  ó  )   ", "    \\  --  /    ", "   /|      |\\   ", "  / |______| \\  ", "    |      |    ", "                " },
                 { "   (  O  O  )   ", "    \\  --  /    ", "   /|      |\\   ", "  / |______| \\  ", "    |      |    ", "                " }
@@ -100,9 +109,9 @@ void UIManager::DisplayASCIIAnimation() {
             targetFrames = &orc;
             frameSpeed = 8;
         }
-        else { // Dragon (PROGRESSION >= 3)
+        else {
             static std::vector<std::vector<std::string>> dragon = {
-                { // 1. 숨을 고르며 노려보는 상태
+                {
                     "      /\\____/\\  ",
                     "     /  o  o  \\ ",
                     "    (    --    )",
@@ -110,7 +119,7 @@ void UIManager::DisplayASCIIAnimation() {
                     "      \\______/  ",
                     "      /      \\  "
                 },
-                { // 2. 불꽃이 입가에 맺힘 (연기/불씨)
+                {
                     "      /\\____/\\  ",
                     "     /  ò  ò  \\ ",
                     "    (    --    )*",
@@ -118,7 +127,7 @@ void UIManager::DisplayASCIIAnimation() {
                     "      \\______/  ",
                     "      /      \\  "
                 },
-                { // 3. 화염 방사 (강력한 임팩트)
+                {
                     "      /\\____/\\  ",
                     "     /  O  O  \\ @",
                     "    (    --    )@",
@@ -126,7 +135,7 @@ void UIManager::DisplayASCIIAnimation() {
                     "      \\______/  @",
                     "      /      \\  "
                 },
-                { // 4. 화염이 소멸하며 입을 다묾
+                {
                     "      /\\____/\\  ",
                     "     /  -  -  \\ ",
                     "    (    --    )",
@@ -136,16 +145,15 @@ void UIManager::DisplayASCIIAnimation() {
                 }
             };
             targetFrames = &dragon;
-            frameSpeed = 7; // 화염 방사의 긴박감을 위해 속도를 약간 올림
+            frameSpeed = 7;
         }
-        break;
     }
-    case Stage::AlchemyWorkshopShow:
-    case Stage::AlchemyWorkshopSearchByName:
-    case Stage::AlchemyWorkshopSearchByIngredient:
-    case Stage::AlchemyWorkshopDispense:
-    case Stage::AlchemyWorkshopReturn:
-    case Stage::AlchemyWorkshop: {
+    else if (dynamic_cast<AlchemyWorkshopState*>(currentState) ||
+        dynamic_cast<AlchemyWorkshopShowState*>(currentState) ||
+        dynamic_cast<AlchemyWorkshopSearchByNameState*>(currentState) ||
+        dynamic_cast<AlchemyWorkshopSearchByIngredientState*>(currentState) ||
+        dynamic_cast<AlchemyWorkshopDispenseState*>(currentState) ||
+        dynamic_cast<AlchemyWorkshopReturnState*>(currentState)) {
         static std::vector<std::vector<std::string>> cauldron = {
             { "       o        ", "    O           ", "   .-----.      ", "  /_______\\     ", "  \\_______/     ", "   (  )  )      " },
             { "          O     ", "      o         ", "   .-----.      ", "  /_______\\     ", "  \\_______/     ", "   )  (  (      " },
@@ -154,8 +162,6 @@ void UIManager::DisplayASCIIAnimation() {
         };
         targetFrames = &cauldron;
         frameSpeed = 8;
-        break;
-    }
     }
 
     if (targetFrames == nullptr || targetFrames->empty()) return;
@@ -314,6 +320,11 @@ void UIManager::Render() {
 
     FRAMECOUNT++;
     fflush(stdout);
+}
+
+void UIManager::ClearAllCenterLeftUI() {
+    for (int i = 0; i < 13; i++)
+        UIManager::SetContext(UIPart::CenterLeft, i, "");
 }
 
 void UIManager::DisplayUIPart(UIPart part, int lineIdx, const std::string& text) {

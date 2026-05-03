@@ -18,6 +18,72 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Scripts\AlchemyWorkshop.cpp" />
+    <ClCompile Include="Scripts\AlchemyWorkshopDispenseState.cpp" />
+    <ClCompile Include="Scripts\AlchemyWorkshopReturnState.cpp" />
+    <ClCompile Include="Scripts\AlchemyWorkshopSearchByIngredientState.cpp" />
+    <ClCompile Include="Scripts\AlchemyWorkshopSearchByNameState.cpp" />
+    <ClCompile Include="Scripts\AlchemyWorkshopShowState.cpp" />
+    <ClCompile Include="Scripts\AlchemyWorkshopState.cpp" />
+    <ClCompile Include="Scripts\BattleMapState.cpp" />
+    <ClCompile Include="Scripts\BattleRewardState.cpp" />
+    <ClCompile Include="Scripts\BattleState.cpp" />
+    <ClCompile Include="Scripts\CharacterUpgradeState.cpp" />
+    <ClCompile Include="Scripts\Controller.cpp" />
+    <ClCompile Include="Scripts\GameClearState.cpp" />
+    <ClCompile Include="Scripts\GameDefeatState.cpp" />
+    <ClCompile Include="Scripts\GameManager.cpp" />
+    <ClCompile Include="Scripts\GameStartState.cpp" />
+    <ClCompile Include="Scripts\InventoryState.cpp" />
+    <ClCompile Include="Scripts\Item.cpp" />
+    <ClCompile Include="Scripts\JobSelectionState.cpp" />
+    <ClCompile Include="Scripts\main.cpp" />
+    <ClCompile Include="Scripts\MainMenuState.cpp" />
+    <ClCompile Include="Scripts\Player.cpp" />
+    <ClCompile Include="Scripts\UI.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Scripts\AlchemyWorkshop.h" />
+    <ClInclude Include="Scripts\AlchemyWorkshopDispenseState.h" />
+    <ClInclude Include="Scripts\AlchemyWorkshopReturnState.h" />
+    <ClInclude Include="Scripts\AlchemyWorkshopSearchByIngredientState.h" />
+    <ClInclude Include="Scripts\AlchemyWorkshopSearchByNameState.h" />
+    <ClInclude Include="Scripts\AlchemyWorkshopShowState.h" />
+    <ClInclude Include="Scripts\AlchemyWorkshopState.h" />
+    <ClInclude Include="Scripts\Archer.h" />
+    <ClInclude Include="Scripts\BattleMapState.h" />
+    <ClInclude Include="Scripts\BattleRewardState.h" />
+    <ClInclude Include="Scripts\BattleState.h" />
+    <ClInclude Include="Scripts\Character.h" />
+    <ClInclude Include="Scripts\CharacterUpgradeState.h" />
+    <ClInclude Include="Scripts\Configuration.h" />
+    <ClInclude Include="Scripts\Controller.h" />
+    <ClInclude Include="Scripts\Dragon.h" />
+    <ClInclude Include="Scripts\DungeonRoom.h" />
+    <ClInclude Include="Scripts\GameClearState.h" />
+    <ClInclude Include="Scripts\GameDefeatState.h" />
+    <ClInclude Include="Scripts\GameManager.h" />
+    <ClInclude Include="Scripts\GameStartState.h" />
+    <ClInclude Include="Scripts\Goblin.h" />
+    <ClInclude Include="Scripts\IBattleable.h" />
+    <ClInclude Include="Scripts\IGameState.h" />
+    <ClInclude Include="Scripts\Inventory.h" />
+    <ClInclude Include="Scripts\InventoryState.h" />
+    <ClInclude Include="Scripts\Item.h" />
+    <ClInclude Include="Scripts\JobSelectionState.h" />
+    <ClInclude Include="Scripts\Mage.h" />
+    <ClInclude Include="Scripts\MainMenuState.h" />
+    <ClInclude Include="Scripts\Monster.h" />
+    <ClInclude Include="Scripts\Orc.h" />
+    <ClInclude Include="Scripts\Player.h" />
+    <ClInclude Include="Scripts\PotionRecipe.h" />
+    <ClInclude Include="Scripts\Slime.h" />
+    <ClInclude Include="Scripts\Thief.h" />
+    <ClInclude Include="Scripts\UIManager.h" />
+    <ClInclude Include="Scripts\Utils.h" />
+    <ClInclude Include="Scripts\Warrior.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -123,47 +189,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="AlchemyWorkshop.cpp" />
-    <ClCompile Include="Archer.cpp" />
-    <ClCompile Include="Character.cpp" />
-    <ClCompile Include="Controller.cpp" />
-    <ClCompile Include="GameManager.cpp" />
-    <ClCompile Include="Inventory.cpp" />
-    <ClCompile Include="Item.cpp" />
-    <ClCompile Include="Mage.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Monster.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="PotionRecipe.cpp" />
-    <ClCompile Include="Thief.cpp" />
-    <ClCompile Include="UI.cpp" />
-    <ClCompile Include="Warrior.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="AlchemyWorkshop.h" />
-    <ClInclude Include="Archer.h" />
-    <ClInclude Include="Character.h" />
-    <ClInclude Include="Configuration.h" />
-    <ClInclude Include="Controller.h" />
-    <ClInclude Include="Dragon.h" />
-    <ClInclude Include="DungeonRoom.h" />
-    <ClInclude Include="GameManager.h" />
-    <ClInclude Include="Goblin.h" />
-    <ClInclude Include="IBattleable.h" />
-    <ClInclude Include="Inventory.h" />
-    <ClInclude Include="Item.h" />
-    <ClInclude Include="Mage.h" />
-    <ClInclude Include="Monster.h" />
-    <ClInclude Include="Orc.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="PotionRecipe.h" />
-    <ClInclude Include="Slime.h" />
-    <ClInclude Include="Thief.h" />
-    <ClInclude Include="UIManager.h" />
-    <ClInclude Include="Utils.h" />
-    <ClInclude Include="Warrior.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

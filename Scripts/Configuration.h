@@ -25,30 +25,29 @@ enum class ItemType {
     DragonHorn,
 };
 
-enum class Stage {
-    MainMenu,
-    GameStart,
-    Inventory,
-    CharacterUpgrade,
-    JobSelection,
-
-    // 배틀 분기
-    Battle,
-    BattleMap,
-    BattleReward,
-
-    // 포션 제작소 분기
-    AlchemyWorkshop,
-    AlchemyWorkshopShow,
-    AlchemyWorkshopSearchByName,
-    AlchemyWorkshopSearchByIngredient,
-    AlchemyWorkshopDispense,
-    AlchemyWorkshopReturn,
-
-    GameClear,
-    GameDefeat,
-};
+//enum class Stage {
+//    MainMenu,
+//    GameStart,
+//    Inventory,
+//    CharacterUpgrade,
+//    JobSelection,
+//
+//    // 배틀 분기
+//    Battle,
+//    BattleMap,
+//    BattleReward,
+//
+//    // 포션 제작소 분기
+//    AlchemyWorkshop,
+//    AlchemyWorkshopShow,
+//    AlchemyWorkshopSearchByName,
+//    AlchemyWorkshopSearchByIngredient,
+//    AlchemyWorkshopDispense,
+//    AlchemyWorkshopReturn,
+//
+//    GameClear,
+//    GameDefeat,
+//};
 
 // 게임 변수
-inline Stage CURRENT_STAGE = Stage::GameStart;
-inline Stage PREVIOUS_STAGE = Stage::MainMenu;
+inline std::string currentQuery = "";

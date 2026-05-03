@@ -15,6 +15,8 @@ public:
     static void DisplayInventory();
     static void SetContext(UIPart part, int lineIdx, const std::string& text);
 
+    static void ClearAllCenterLeftUI();
+
     // [선택사항] 실시간 특정 부분만 덮어쓰기가 필요할 경우를 대비해 유지
     static void DisplayUIPart(UIPart part, int lineIdx, const std::string& text);
 

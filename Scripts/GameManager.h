@@ -1,5 +1,6 @@
 #pragma once
 
+class IGameState;
 class Player;
 class Monster;
 class DungeonRoom;
@@ -10,7 +11,8 @@ class GameManager {
 private:
     GameManager(); // 숨김
     static constexpr int ROOM_SIZE = 4;
-    Player* PLAYER = nullptr; // 전방선언은 포인터만 가능
+    IGameState* CURRENT_STATE = nullptr; // 전방선언은 포인터만 가능
+    Player* PLAYER = nullptr;
     Monster* MONSTER = nullptr;
     Alchemyworkshop* ALCHEMY_WORKSHOP = nullptr;
     DungeonRoom* ROOM[ROOM_SIZE]{ nullptr, nullptr, nullptr, nullptr };
@@ -28,6 +30,9 @@ public:
     }
 
     bool IsGameRunning = false;
+
+    void SetCurrentState(IGameState* newState);
+    IGameState* GetCurrentState();
 
     Alchemyworkshop* GetAlchemyworkshop();
 
