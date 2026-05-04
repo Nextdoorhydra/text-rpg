@@ -42,7 +42,7 @@ Enter your hero's name: )";
         std::cout << "Enter Attack and Defense: ";
         std::cin >> stat[2] >> stat[3];
 
-        if (stat[0] >= 50 && stat[1] >= 50 && stat[2] > 0 && stat[3] > 0) {
+        if (stat[0] > 50 && stat[1] > 50 && stat[2] > 0 && stat[3] > 0) {
             player->SetHp(stat[0]);
             player->MaxHp = stat[0];
             player->Mp = stat[1];
@@ -52,7 +52,7 @@ Enter your hero's name: )";
             break;
         }
 
-        std::cout << "Invalid input. Please enter positive values greater or equal than 50 for HP, MP." << std::endl;
+        std::cout << "Invalid input. Please enter positive values greater than 50 for HP, MP." << std::endl;
         std::cout << "Invalid input. Please enter positive values greater than 0 for Attack, Defense." << std::endl;
     }
 
